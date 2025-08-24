@@ -3,7 +3,7 @@ package main.java.ch.javamilesiii;
 import java.time.LocalDateTime;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Main main = new Main();
         main.startSimulation();
     }
@@ -16,7 +16,7 @@ public class Main {
                 new Card("989631", "3584633661427269", LocalDateTime.of(2030, 8, 31, 23, 59), "523", new BankAccount("CH5604835012345678011", "Sarah Taylor", 1000.0))
         };
     }
-    private void startSimulation(){
+    private void startSimulation() throws InterruptedException {
         ATM atm = new ATM("ATM1");
         atm.run(setupTestData());
     }

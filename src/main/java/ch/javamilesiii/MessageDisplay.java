@@ -21,7 +21,7 @@ public class MessageDisplay {
     public void showMenu(Card card){
         clear();
         List<String> headerLines = List.of(
-                "Hello "+card.getCardOwner()+"!",
+                "Hello " + card.getCardOwner() + "!",
                 "What can I do for you today?",
                 " ",
                 "Your actual balance is: " + card.getBankAccount().getBalance() + " CHF"
@@ -31,14 +31,46 @@ public class MessageDisplay {
                 "2 - Deposit",
                 "3 - Eject Card"
         );
-        List<String> emptyLines = List.of(
-                "\n".repeat(MessageDisplay.MAX_DISPLAY_LINES - headerLines.size() - menuLines.size())
-        );
+        int totalContentLines = MAX_DISPLAY_LINES - HEADER_LINES - 1;
+        int emptyLinesNeeded = totalContentLines - headerLines.size() - menuLines.size();
         List<String> menuDisplay = new ArrayList<>();
         menuDisplay.addAll(headerLines);
-        menuDisplay.addAll(emptyLines);
+        for (int i = 0; i < emptyLinesNeeded; i++) {
+            menuDisplay.add(" ");
+        }
         menuDisplay.addAll(menuLines);
-        renderBorderedDisplay(menuDisplay);
+
+        List<String> paddedLines = padLines(menuDisplay);
+        renderBorderedDisplay(paddedLines);
+    }
+
+    public void showWithdrawalMenu(Card card){
+        clear();
+        List<String> headerLines = List.of(
+                "How much do you want to withdraw?",
+                " ",
+                " ",
+                "Your actual balance is: " + card.getBankAccount().getBalance() + " CHF"
+        );
+        List<String> menuLines = List.of(
+                "1 - CHF 10.-",
+                "2 - CHF 20.-",
+                "3 - CHF 50.-",
+                "4 - CHF 100.-",
+                "5 - Custom amount",
+                "6 - Cancel"
+        );
+        int totalContentLines = MAX_DISPLAY_LINES - HEADER_LINES - 1;
+        int emptyLinesNeeded = totalContentLines - headerLines.size() - menuLines.size();
+        List<String> menuDisplay = new ArrayList<>();
+        menuDisplay.addAll(headerLines);
+        for (int i = 0; i < emptyLinesNeeded; i++) {
+            menuDisplay.add(" ");
+        }
+        menuDisplay.addAll(menuLines);
+
+        List<String> paddedLines = padLines(menuDisplay);
+        renderBorderedDisplay(paddedLines);
     }
 
     private List<String> wrapText(String message) {

@@ -9,7 +9,7 @@ public class ATM {
         this.messageDisplay = new MessageDisplay();
         this.ioHandler = new IOHandler();
     }
-    public void run(Card[] cards){
+    public void run(Card[] cards) throws InterruptedException {
         messageDisplay.showMessage("Please insert your card:");
         System.out.println("Enter 1 to insert a card, 0 to exit:");
         int choice = ioHandler.getMenuChoice();
@@ -55,6 +55,10 @@ public class ATM {
                     ejectCard();
                     messageDisplay.showMessage("Goodbye!");
                     return;
+                default:
+                    messageDisplay.showMessage("Invalid choice. Please try again.");
+                    Thread.sleep(2000);
+                    break;
             }
         }
     }
@@ -71,10 +75,54 @@ public class ATM {
         }
         return !currentCard.validatePin(ioHandler.getPinInput());
     }
-    public void withdrawTransaction(){
+    public void withdrawTransaction() throws InterruptedException {
+        messageDisplay.showWithdrawalMenu(currentCard);
+        int choice = ioHandler.getMenuChoice();
+        switch (choice) {
+            case 1:
+                currentCard.getBankAccount().withdraw(10);
+                messageDisplay.showMessage("Transaction successful. Please take your cash.\nYour new balance is: " + currentCard.getBankAccount().getBalance() + " CHF");
+                Thread.sleep(5000);
+                break;
+            case 2:
+                currentCard.getBankAccount().withdraw(20);
+                messageDisplay.showMessage("Transaction successful. Please take your cash.\nYour new balance is: " + currentCard.getBankAccount().getBalance() + " CHF");
+                Thread.sleep(5000);
+                break;
+            case 3:
+                currentCard.getBankAccount().withdraw(50);
+                messageDisplay.showMessage("Transaction successful. Please take your cash.\nYour new balance is: " + currentCard.getBankAccount().getBalance() + " CHF");
+                Thread.sleep(5000);
+                break;
+            case 4:
+                currentCard.getBankAccount().withdraw(100);
+                messageDisplay.showMessage("Transaction successful. Please take your cash.\nYour new balance is: " + currentCard.getBankAccount().getBalance() + " CHF");
+                Thread.sleep(5000);
+                break;
+            case 5:
+                messageDisplay.showMessage("Please enter the amount you want to withdraw:");
+                double amount = ioHandler.getAmount();
+                currentCard.getBankAccount().withdraw(amount);
+                messageDisplay.showMessage("Transaction successful. Please take your cash.\nYour new balance is: " + currentCard.getBankAccount().getBalance() + " CHF");
+                Thread.sleep(5000);
+                break;
+            case 6:
+                messageDisplay.showMessage("Transaction canceled.");
+                Thread.sleep(2000);
+                break;
+            default:
+                messageDisplay.showMessage("Invalid choice. Please try again.");
+                Thread.sleep(2000);
+                break;
+        }
 
     }
-    public void depositTransaction(){
+    public void depositTransaction() throws InterruptedException {
+        messageDisplay.showMessage("Please enter the amount you want to deposit:");
+        double amount = ioHandler.getAmount();
+        currentCard.getBankAccount().deposit(amount);
+        messageDisplay.showMessage("Transaction successful. Thank you for your deposit.\nYour new balance is: " + currentCard.getBankAccount().getBalance() + " CHF");
+        Thread.sleep(5000);
 
     }
     public void ejectCard(){
