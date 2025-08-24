@@ -33,8 +33,7 @@ public class MessageDisplay {
         );
         int totalContentLines = MAX_DISPLAY_LINES - HEADER_LINES - 1;
         int emptyLinesNeeded = totalContentLines - headerLines.size() - menuLines.size();
-        List<String> menuDisplay = new ArrayList<>();
-        menuDisplay.addAll(headerLines);
+        List<String> menuDisplay = new ArrayList<>(headerLines);
         for (int i = 0; i < emptyLinesNeeded; i++) {
             menuDisplay.add(" ");
         }
@@ -62,8 +61,7 @@ public class MessageDisplay {
         );
         int totalContentLines = MAX_DISPLAY_LINES - HEADER_LINES - 1;
         int emptyLinesNeeded = totalContentLines - headerLines.size() - menuLines.size();
-        List<String> menuDisplay = new ArrayList<>();
-        menuDisplay.addAll(headerLines);
+        List<String> menuDisplay = new ArrayList<>(headerLines);
         for (int i = 0; i < emptyLinesNeeded; i++) {
             menuDisplay.add(" ");
         }
@@ -76,27 +74,24 @@ public class MessageDisplay {
     private List<String> wrapText(String message) {
         List<String> lines = new ArrayList<>();
 
-        if (message.length() <= MessageDisplay.OUTPUT_LENGTH) {
+        if (message.length() <= OUTPUT_LENGTH) {
             lines.add(message);
             return lines;
         }
+
         if (message.contains("\n")) {
             String[] splitMessages = message.split("\n");
             for (String splitMessage : splitMessages) {
-                if (splitMessage.length() <= MessageDisplay.OUTPUT_LENGTH) {
-                    lines.add(splitMessage);
-                    continue;
-                }
-                List<String> wrappedLines = wrapText(splitMessage);
-                lines.addAll(wrappedLines);
-                return lines;
+                lines.addAll(wrapText(splitMessage));
             }
+            return lines;
         }
+
         String[] words = message.split(" ");
         StringBuilder currentLine = new StringBuilder();
 
         for (String word : words) {
-            if (currentLine.length() + word.length() + 1 > MessageDisplay.OUTPUT_LENGTH) {
+            if (currentLine.length() + word.length() + 1 > OUTPUT_LENGTH) {
                 if (!currentLine.isEmpty()) {
                     lines.add(currentLine.toString());
                     currentLine = new StringBuilder();
