@@ -3,36 +3,34 @@ package main.java.ch.javamilesiii;
 import java.time.LocalDateTime;
 
 public class Card {
-    private String cardNumber;
-    private String cardHolder;
-    private LocalDateTime expirationDate;
-    private int cvv;
-    private int pin;
-    private BankAccount bankAccount;
+    private final String pin;
+    private final String cardNumber;
+    private final LocalDateTime expirationDate;
+    private final String cvv;
+    private final BankAccount bankAccount;
 
-    public Card(String cardNumber, String cardHolder, LocalDateTime expirationDate, int cvv, int pin) {
-        this.cardNumber = cardNumber;
-        this.cardHolder = cardHolder;
+    public Card(String pin, String cardnumber, LocalDateTime expirationDate, String cvv, BankAccount account) {
+        this.cardNumber = cardnumber;
         this.expirationDate = expirationDate;
         this.cvv = cvv;
         this.pin = pin;
-        this.bankAccount = new BankAccount(0, "0000000000", "No Name", "0000", "CH0000000000000000000", "No Bank");
+        this.bankAccount = account;
     }
 
+    public boolean validatePin(String pin) {
+        return this.pin.equals(pin);
+    }
     public String getCardNumber() {
         return cardNumber;
     }
-    public String getCardHolder() {
-        return cardHolder;
+    public boolean isExpired() {
+        return expirationDate.isBefore(LocalDateTime.now());
     }
-    public LocalDateTime getExpirationDate() {
-        return expirationDate;
+    public boolean validateCVV(String cvv) {
+        return this.cvv.equals(cvv);
     }
-    public int getCvv() {
-        return cvv;
-    }
-    public int getPin() {
-        return pin;
+    public String getCardOwner() {
+        return bankAccount.getOwner();
     }
     public BankAccount getBankAccount() {
         return bankAccount;

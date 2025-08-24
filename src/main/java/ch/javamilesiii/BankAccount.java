@@ -1,38 +1,33 @@
 package main.java.ch.javamilesiii;
 
 public class BankAccount {
-    private int balance;
-    private String accountNumber;
-    private String accountHolder;
-    private String password;
-    private String iban;
-    private String bankName;
+    private final String iban;
+    private final String owner;
+    private double balance;
 
-    public BankAccount(int balance, String accountNumber, String accountHolder, String password, String iban, String bankName) {
-        this.balance = balance;
-        this.accountNumber = accountNumber;
-        this.accountHolder = accountHolder;
-        this.password = password;
+    public BankAccount(String iban, String owner, double initialBalance) {
         this.iban = iban;
-        this.bankName = bankName;
+        this.owner = owner;
+        this.balance = initialBalance;
     }
-
-    public int getBalance() {
-        return balance;
+    public boolean withdraw(double amount) {
+        if (amount > balance) {
+            return false;
+        }
+        balance -= amount;
+        return true;
     }
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-    public String getAccountHolder() {
-        return accountHolder;
-    }
-    public String getPassword() {
-        return password;
+    public boolean deposit(double amount) {
+        balance += amount;
+        return true;
     }
     public String getIban() {
         return iban;
     }
-    public String getBankName() {
-        return bankName;
+    public String getOwner() {
+        return owner;
+    }
+    public double getBalance() {
+        return balance;
     }
 }
