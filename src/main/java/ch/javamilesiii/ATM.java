@@ -9,123 +9,161 @@ public class ATM {
         this.messageDisplay = new MessageDisplay();
         this.ioHandler = new IOHandler();
     }
+
     public void run(Card[] cards) throws InterruptedException {
-        messageDisplay.showMessage("Please insert your card:");
-        System.out.println("Enter 1 to insert a card, 0 to exit:");
-        int choice = ioHandler.getMenuChoice();
-        if (choice == 0){
-            System.out.println("Goodbye!");
+        if (!selectCard(cards)) {
             return;
         }
-        int cardChoice = 0;
-        do {
-            messageDisplay.clear();
-            messageDisplay.showMessage("Please insert your card:");
-            for (int i = 0; i < cards.length; i++) {
-                System.out.println("Card " + (i+1) + ": " + cards[i].getBankAccount().getOwner());
-            }
-            cardChoice = ioHandler.getMenuChoice();
-            if (cardChoice > cards.length || cardChoice < 1){
-                messageDisplay.showMessage("Invalid card choice. Please try again.");
-                continue;
-            }
-        } while (cardChoice > cards.length || cardChoice < 1);
-        insertCard(cards[cardChoice-1]);
-        boolean passed = false;
-        do {
-            messageDisplay.showMessage("Please enter your PIN:");
-            if (authenticateUser()){
-                messageDisplay.showMessage("Invalid PIN. Please try again.");
-                continue;
-            }
-            passed = true;
-        } while (!passed);
-        while (true) {
-            messageDisplay.showMenu(currentCard);
-            //messageDisplay.showMessage("this is a test to see if the messageDisplay works while cutting into 44 symbols per line");
-            int menuChoice = ioHandler.getMenuChoice();
-            switch (menuChoice) {
-                case 1:
-                    withdrawTransaction();
-                    break;
-                case 2:
-                    depositTransaction();
-                    break;
-                case 3:
-                    ejectCard();
-                    messageDisplay.showMessage("Goodbye!");
-                    return;
-                default:
-                    messageDisplay.showMessage("Invalid choice. Please try again.");
-                    Thread.sleep(2000);
-                    break;
-            }
+
+        if (!authenticateUser()) {
+            return;
         }
+        if (isCardExpired()) {
+            return;
+        }
+
+        runMainLoop();
+        cleanup();
     }
-    public boolean insertCard(Card card){
-        if (card == null) {
+
+    private boolean selectCard(Card[] cards) throws InterruptedException {
+        messageDisplay.showMessage("Welcome! Insert your card:");
+        System.out.println("1 - Insert card, 0 - Exit");
+
+        if (ioHandler.getMenuChoice() == 0) {
+            messageDisplay.showMessage("Goodbye!");
             return false;
         }
-        this.currentCard = card;
+
+        int cardChoice;
+        do {
+            showCardOptions(cards);
+            cardChoice = ioHandler.getMenuChoice();
+
+            if (cardChoice < 1 || cardChoice > cards.length) {
+                messageDisplay.showMessage("Invalid choice. Try again.");
+                Thread.sleep(1500);
+                continue;
+            }
+            break;
+        } while (true);
+
+        insertCard(cards[cardChoice - 1]);
         return true;
     }
-    public boolean authenticateUser(){
-        if (currentCard == null) {
-            return true;
+
+    private void showCardOptions(Card[] cards) {
+        messageDisplay.clear();
+        messageDisplay.showMessage("Select your card:");
+        for (int i = 0; i < cards.length; i++) {
+            System.out.println((i + 1) + " - " + cards[i].getBankAccount().getOwner());
         }
-        return !currentCard.validatePin(ioHandler.getPinInput());
     }
-    public void withdrawTransaction() throws InterruptedException {
+
+    private boolean authenticateUser() throws InterruptedException {
+        int attempts = 0;
+        final int MAX_ATTEMPTS = 3;
+
+        while (attempts < MAX_ATTEMPTS) {
+            messageDisplay.showMessage("Enter your PIN:");
+            String pin = ioHandler.getPinInput();
+
+            if (currentCard.validatePin(pin)) {
+                return true;
+            }
+
+            attempts++;
+            if (attempts < MAX_ATTEMPTS) {
+                messageDisplay.showMessage("Wrong PIN. " + (MAX_ATTEMPTS - attempts) + " attempts left.");
+                Thread.sleep(2000);
+            }
+        }
+
+        messageDisplay.showMessage("Too many wrong attempts. Card blocked.");
+        return false;
+    }
+
+    private boolean isCardExpired() throws InterruptedException {
+        if (!currentCard.isExpired()) return false;
+        messageDisplay.showMessage("Your card is expired.");
+        Thread.sleep(2000);
+        return currentCard.isExpired();
+    }
+
+    private void runMainLoop() throws InterruptedException {
+        while (true) {
+            messageDisplay.showMenu(currentCard);
+            int choice = ioHandler.getMenuChoice();
+
+            switch (choice) {
+                case 1 -> handleWithdrawal();
+                case 2 -> handleDeposit();
+                case 3 -> {
+                    messageDisplay.showMessage("Thank you! Goodbye!");
+                    return;
+                }
+                default -> {
+                    messageDisplay.showMessage("Invalid choice. Try again.");
+                    Thread.sleep(1500);
+                }
+            }
+        }
+    }
+
+    private void handleWithdrawal() throws InterruptedException {
         messageDisplay.showWithdrawalMenu(currentCard);
         int choice = ioHandler.getMenuChoice();
-        switch (choice) {
-            case 1:
-                currentCard.getBankAccount().withdraw(10);
-                messageDisplay.showMessage("Transaction successful. Please take your cash.\nYour new balance is: " + currentCard.getBankAccount().getBalance() + " CHF");
-                Thread.sleep(5000);
-                break;
-            case 2:
-                currentCard.getBankAccount().withdraw(20);
-                messageDisplay.showMessage("Transaction successful. Please take your cash.\nYour new balance is: " + currentCard.getBankAccount().getBalance() + " CHF");
-                Thread.sleep(5000);
-                break;
-            case 3:
-                currentCard.getBankAccount().withdraw(50);
-                messageDisplay.showMessage("Transaction successful. Please take your cash.\nYour new balance is: " + currentCard.getBankAccount().getBalance() + " CHF");
-                Thread.sleep(5000);
-                break;
-            case 4:
-                currentCard.getBankAccount().withdraw(100);
-                messageDisplay.showMessage("Transaction successful. Please take your cash.\nYour new balance is: " + currentCard.getBankAccount().getBalance() + " CHF");
-                Thread.sleep(5000);
-                break;
-            case 5:
-                messageDisplay.showMessage("Please enter the amount you want to withdraw:");
-                double amount = ioHandler.getAmount();
-                currentCard.getBankAccount().withdraw(amount);
-                messageDisplay.showMessage("Transaction successful. Please take your cash.\nYour new balance is: " + currentCard.getBankAccount().getBalance() + " CHF");
-                Thread.sleep(5000);
-                break;
-            case 6:
-                messageDisplay.showMessage("Transaction canceled.");
-                Thread.sleep(2000);
-                break;
-            default:
-                messageDisplay.showMessage("Invalid choice. Please try again.");
-                Thread.sleep(2000);
-                break;
+
+        double amount = switch (choice) {
+            case 1 -> 10.0;
+            case 2 -> 20.0;
+            case 3 -> 50.0;
+            case 4 -> 100.0;
+            case 5 -> {
+                messageDisplay.showMessage("Enter withdrawal amount:");
+                yield ioHandler.getAmount();
+            }
+            case 6 -> {
+                messageDisplay.showMessage("Withdrawal cancelled.");
+                Thread.sleep(1500);
+                yield -1;
+            }
+            default -> {
+                messageDisplay.showMessage("Invalid choice.");
+                Thread.sleep(1500);
+                yield -1;
+            }
+        };
+
+        if (amount == -1) return;
+
+        if (currentCard.getBankAccount().withdraw(amount)) {
+            showSuccessMessage("Take your cash");
+        } else {
+            messageDisplay.showMessage("Transaction failed. Check your balance.");
+            Thread.sleep(2000);
         }
-
     }
-    public void depositTransaction() throws InterruptedException {
-        messageDisplay.showMessage("Please enter the amount you want to deposit:");
+
+    private void handleDeposit() throws InterruptedException {
+        messageDisplay.showMessage("Enter deposit amount:");
         double amount = ioHandler.getAmount();
-        currentCard.getBankAccount().deposit(amount);
-        messageDisplay.showMessage("Transaction successful. Thank you for your deposit.\nYour new balance is: " + currentCard.getBankAccount().getBalance() + " CHF");
-        Thread.sleep(5000);
 
+        currentCard.getBankAccount().deposit(amount);
+        showSuccessMessage("Deposit successful");
     }
-    public void ejectCard(){
+
+    private void showSuccessMessage(String message) throws InterruptedException {
+        double newBalance = currentCard.getBankAccount().getBalance();
+        messageDisplay.showMessage(message + "\nNew balance: " + newBalance + " CHF");
+        Thread.sleep(3000);
+    }
+
+    private void insertCard(Card card) {
+        this.currentCard = card;
+    }
+
+    private void cleanup() {
         this.currentCard = null;
     }
 }

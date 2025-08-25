@@ -10,12 +10,38 @@ public class IOHandler {
     }
 
     public int getMenuChoice() {
-        return scanner.nextInt();
+        while (true) {
+            try {
+                System.out.print("Choice: ");
+                int choice = scanner.nextInt();
+                scanner.nextLine();
+                return choice;
+            } catch (Exception e) {
+                System.out.println("Please enter a valid number.");
+                scanner.nextLine();
+            }
+        }
     }
+
     public String getPinInput() {
-        return scanner.next();
+        System.out.print("PIN: ");
+        return scanner.nextLine().trim();
     }
-    public double getAmount(){
-        return scanner.nextDouble();
+
+    public double getAmount() {
+        while (true) {
+            try {
+                System.out.print("Amount: ");
+                double amount = scanner.nextDouble();
+                scanner.nextLine();
+                if (amount > 0) {
+                    return amount;
+                }
+                System.out.println("Amount must be positive.");
+            } catch (Exception e) {
+                System.out.println("Please enter a valid amount.");
+                scanner.nextLine();
+            }
+        }
     }
 }

@@ -9,8 +9,8 @@ public class Card {
     private final String cvv;
     private final BankAccount bankAccount;
 
-    public Card(String pin, String cardnumber, LocalDateTime expirationDate, String cvv, BankAccount account) {
-        this.cardNumber = cardnumber;
+    public Card(String pin, String cardNumber, LocalDateTime expirationDate, String cvv, BankAccount account) {
+        this.cardNumber = cardNumber;
         this.expirationDate = expirationDate;
         this.cvv = cvv;
         this.pin = pin;

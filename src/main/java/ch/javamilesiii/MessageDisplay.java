@@ -18,72 +18,73 @@ public class MessageDisplay {
         renderBorderedDisplay(paddedLines);
     }
 
-    public void showMenu(Card card){
-        clear();
+    public void showMenu(Card card) {
         List<String> headerLines = List.of(
                 "Hello " + card.getCardOwner() + "!",
                 "What can I do for you today?",
                 " ",
-                "Your actual balance is: " + card.getBankAccount().getBalance() + " CHF"
+                "Balance: " + card.getBankAccount().getBalance() + " CHF"
         );
         List<String> menuLines = List.of(
                 "1 - Withdraw",
                 "2 - Deposit",
                 "3 - Eject Card"
         );
-        int totalContentLines = MAX_DISPLAY_LINES - HEADER_LINES - 1;
-        int emptyLinesNeeded = totalContentLines - headerLines.size() - menuLines.size();
-        List<String> menuDisplay = new ArrayList<>(headerLines);
-        for (int i = 0; i < emptyLinesNeeded; i++) {
-            menuDisplay.add(" ");
-        }
-        menuDisplay.addAll(menuLines);
-
-        List<String> paddedLines = padLines(menuDisplay);
-        renderBorderedDisplay(paddedLines);
+        showMenuLayout(headerLines, menuLines);
     }
 
-    public void showWithdrawalMenu(Card card){
-        clear();
+    public void showWithdrawalMenu(Card card) {
         List<String> headerLines = List.of(
-                "How much do you want to withdraw?",
+                "Withdrawal Menu",
                 " ",
-                " ",
-                "Your actual balance is: " + card.getBankAccount().getBalance() + " CHF"
+                "Balance: " + card.getBankAccount().getBalance() + " CHF"
         );
         List<String> menuLines = List.of(
-                "1 - CHF 10.-",
-                "2 - CHF 20.-",
-                "3 - CHF 50.-",
-                "4 - CHF 100.-",
+                "1 - CHF 10",
+                "2 - CHF 20",
+                "3 - CHF 50",
+                "4 - CHF 100",
                 "5 - Custom amount",
                 "6 - Cancel"
         );
-        int totalContentLines = MAX_DISPLAY_LINES - HEADER_LINES - 1;
-        int emptyLinesNeeded = totalContentLines - headerLines.size() - menuLines.size();
-        List<String> menuDisplay = new ArrayList<>(headerLines);
-        for (int i = 0; i < emptyLinesNeeded; i++) {
-            menuDisplay.add(" ");
-        }
-        menuDisplay.addAll(menuLines);
+        showMenuLayout(headerLines, menuLines);
+    }
 
-        List<String> paddedLines = padLines(menuDisplay);
+    private void showMenuLayout(List<String> headerLines, List<String> menuLines) {
+        clear();
+
+        List<String> allLines = new ArrayList<>(headerLines);
+
+        int totalLines = MAX_DISPLAY_LINES - HEADER_LINES - 1;
+        int spacingNeeded = totalLines - headerLines.size() - menuLines.size();
+        for (int i = 0; i < spacingNeeded; i++) {
+            allLines.add(" ");
+        }
+
+        allLines.addAll(menuLines);
+
+        List<String> paddedLines = padLines(allLines);
         renderBorderedDisplay(paddedLines);
     }
 
     private List<String> wrapText(String message) {
         List<String> lines = new ArrayList<>();
 
-        if (message.length() <= OUTPUT_LENGTH) {
-            lines.add(message);
+        if (message == null || message.isEmpty()) {
+            lines.add("");
             return lines;
         }
 
         if (message.contains("\n")) {
-            String[] splitMessages = message.split("\n");
-            for (String splitMessage : splitMessages) {
-                lines.addAll(wrapText(splitMessage));
+            String[] parts = message.split("\n");
+            for (String part : parts) {
+                lines.addAll(wrapText(part));
             }
+            return lines;
+        }
+
+        if (message.length() <= OUTPUT_LENGTH) {
+            lines.add(message);
             return lines;
         }
 
@@ -118,38 +119,22 @@ public class MessageDisplay {
     }
 
     private String padLine(String line) {
-        int paddingNeeded = MessageDisplay.OUTPUT_LENGTH - line.length();
-        return line + " ".repeat(Math.max(0, paddingNeeded));
+        int padding = OUTPUT_LENGTH - line.length();
+        return line + " ".repeat(Math.max(0, padding));
     }
 
     private void renderBorderedDisplay(List<String> contentLines) {
-        printBorder();
-        printEmptyLine();
+        System.out.println(BORDER);
+        System.out.println(EMPTY_LINE);
 
-        contentLines.forEach(this::printContentLine);
+        contentLines.forEach(line -> System.out.println("#    " + line + "    #"));
 
         int remainingLines = calculateRemainingEmptyLines(contentLines.size());
-        printEmptyLines(remainingLines);
-
-        printBorder();
-    }
-
-    private void printBorder() {
-        System.out.println(BORDER);
-    }
-
-    private void printEmptyLine() {
-        System.out.println(EMPTY_LINE);
-    }
-
-    private void printContentLine(String content) {
-        System.out.println("#    " + content + "    #");
-    }
-
-    private void printEmptyLines(int count) {
-        for (int i = 0; i < count; i++) {
-            printEmptyLine();
+        for (int i = 0; i < remainingLines; i++) {
+            System.out.println(EMPTY_LINE);
         }
+
+        System.out.println(BORDER);
     }
 
     private int calculateRemainingEmptyLines(int contentLines) {
@@ -158,8 +143,6 @@ public class MessageDisplay {
     }
 
     void clear() {
-        /*System.out.print("\033[H\033[2J");
-        System.out.flush();*/
         System.out.println("\n".repeat(10));
     }
 }
